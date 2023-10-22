@@ -1,0 +1,48 @@
+﻿CREATE DATABASE Stock_Market_Data;
+
+USE Stock_Market_Data;
+
+Create Table NiftyHeader (batch_id int,StrikePrice varchar(max),ExpiryDate varchar(max),[Date] varchar(max),Time varchar(max));
+
+
+Create Table NiftyPE  (batch_id int,strikePrice varchar(max),expiryDate varchar(max),underlying varchar(max),
+identifier varchar(max),openInterest varchar(max),changeinOpenInterest varchar(max),pchangeinOpenInterest varchar(max),
+totalTradedVolume varchar(max),impliedVolatility varchar(max),lastPrice varchar(max),change varchar(max),
+pChange varchar(max),totalBuyQuantity varchar(max),totalSellQuantity varchar(max),bidQty varchar(max),
+bidPrice varchar(max),askQty varchar(max),askPrice varchar(max),underlyingValue varchar(max),data_Id varchar(max),
+totOI varchar(max),totVol varchar(max),filtered_Id varchar(max));
+
+
+Create Table NiftyCE (batch_id int,strikePrice varchar(max),expiryDate varchar(max),underlying varchar(max),identifier varchar(max),
+openInterest varchar(max),changeinOpenInterest varchar(max),pchangeinOpenInterest varchar(max),totalTradedVolume varchar(max),
+impliedVolatility varchar(max),lastPrice varchar(max),change varchar(max),pChange varchar(max),totalBuyQuantity varchar(max),
+totalSellQuantity varchar(max),bidQty varchar(max),bidPrice varchar(max),askQty varchar(max),askPrice varchar(max),underlyingValue varchar(max),
+data_Id varchar(max),totOI varchar(max),totVol varchar(max),filtered_Id varchar(max));
+
+
+Create Table BankNiftyHeader (batch_id int,StrikePrice varchar(max),ExpiryDate varchar(max),
+[Date] varchar(max),[Time] varchar(max));
+
+
+CREATE TABLE BankNiftyPE (batch_id int,strikePrice varchar(max),expiryDate varchar(max),
+underlying varchar(max),identifier varchar(max),openInterest varchar(max),changeinOpenInterest varchar(max),
+pchangeinOpenInterest varchar(max),totalTradedVolume varchar(max),impliedVolatility varchar(max),
+lastPrice varchar(max),change varchar(max),pChange varchar(max),totalBuyQuantity varchar(max),
+totalSellQuantity varchar(max),bidQty varchar(max),bidPrice varchar(max),askQty varchar(max),
+askPrice varchar(max),underlyingValue varchar(max),data_Id varchar(max),totOI varchar(max),
+totVol varchar(max),filtered_Id varchar(max));
+
+
+CREATE TABLE BankNiftyCE (batch_id int,strikePrice varchar(max),expiryDate varchar(max),underlying varchar(max),
+identifier varchar(max),openInterest varchar(max),changeinOpenInterest varchar(max),pchangeinOpenInterest varchar(max),
+totalTradedVolume varchar(max),impliedVolatility varchar(max),lastPrice varchar(max),change varchar(max),
+pChange varchar(max),totalBuyQuantity varchar(max),totalSellQuantity varchar(max),bidQty varchar(max),
+bidPrice varchar(max),askQty varchar(max),askPrice varchar(max),underlyingValue varchar(max),data_Id varchar(max),
+totOI varchar(max),totVol varchar(max),filtered_Id varchar(max));
+
+
+CREATE TABLE BankNiftyIndex (batch_id int,[key] varchar(max),index_Id varchar(max),IndexSymbol varchar(max),
+[last] varchar(max),variation varchar(max),percentChange varchar(max),[open] varchar(max),high varchar(max),
+low varchar(max),previousClose varchar(max),yearHigh varchar(max),yearLow varchar(max),pe varchar(max),
+pb varchar(max),dy varchar(max),declines varchar(max),advances varchar(max),unchanged varchar(max),
+index_Id_0 varchar(max),records_Id varchar(max));

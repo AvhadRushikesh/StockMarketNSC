@@ -17,16 +17,14 @@ namespace StockMarketNSC
     {
         HttpClient client = new HttpClient();
         DataSet myDataSet = new DataSet();
-        Timer timer1 = new Timer();
         Timer timer = new Timer();
-        string StartTime = ConfigurationManager.AppSettings["StartTime"];
-        string FilePath = ConfigurationManager.AppSettings["FilePath"];
-        string NIFTY = ConfigurationManager.AppSettings["NIFTY"];
-        string BANKNIFTY = ConfigurationManager.AppSettings["BANKNIFTY"];
-        string SaveNifty = ConfigurationManager.AppSettings["SaveNifty"];
-        string SaveBankNifty = ConfigurationManager.AppSettings["SaveBankNifty"];
-        string DataBase = ConfigurationManager.AppSettings["DataBase"];
-        string ServicePath = ConfigurationManager.AppSettings["ServicePath"];
+        private string _filePath = ConfigurationManager.AppSettings["FilePath"];
+        private string _nIFTY = ConfigurationManager.AppSettings["NIFTY"];
+        private string _bANKNIFTY = ConfigurationManager.AppSettings["BANKNIFTY"];
+        private string _saveNifty = ConfigurationManager.AppSettings["SaveNifty"];
+        private string _saveBankNifty = ConfigurationManager.AppSettings["SaveBankNifty"];
+        private string _connectionString = ConfigurationManager.AppSettings["ConnectionString"];
+        private string _servicePath = ConfigurationManager.AppSettings["ServicePath"];
 
         public Service1()
         {
@@ -41,53 +39,29 @@ namespace StockMarketNSC
         //  Run service every minute from start
         protected override void OnStart(string[] args)
         {
+            WriteToFile("Service Start at " + DateTime.Now);
             timer.Elapsed += new ElapsedEventHandler(OnElapsedTime);
             timer.Interval = 1000;
             timer.Enabled = true;
-            timer.Interval = (60 * 1000);
+            timer.Interval = (60 * 2000);
             timer.Enabled = true;
             timer.Elapsed += new ElapsedEventHandler(Click);
         }
+
 
         private void OnElapsedTime(object source, ElapsedEventArgs e)
         {
             WriteToFile("Service is recall at " + DateTime.Now);
         }
 
-        private double GetNextInterval()
-        {
-            DateTime t = DateTime.Parse(StartTime);
-            TimeSpan ts = new TimeSpan();
-            ts = t - DateTime.Now;
-            if (ts.TotalMilliseconds < 0)
-            {
-                ts = t.AddDays(1) - DateTime.Now;
-            }
-            return ts.TotalMilliseconds;
-        }
-
-        private void SetTimer()
-        {
-            try
-            {
-                double inter = GetNextInterval();
-                timer1.Interval = inter;
-                timer1.Start();
-            }
-            catch (Exception ex)
-            {
-                WriteToFile($"Error: {ex.Message}");
-            }
-        }
-
         public void WriteToFile(string Message)
         {
-            string path = ServicePath;
+            string path = _servicePath;
             if (!Directory.Exists(path))
             {
                 Directory.CreateDirectory(path);
             }
-            string filepath = FilePath + DateTime.Now.Date.ToShortDateString().Replace('/', '_') + ".txt";
+            string filepath = _filePath + DateTime.Now.Date.ToShortDateString().Replace('/', '_') + ".txt";
             if (!File.Exists(filepath))
             {
                 using (StreamWriter sw = File.CreateText(filepath))
@@ -109,13 +83,13 @@ namespace StockMarketNSC
             try
             {
                 client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-                HttpResponseMessage response = await client.GetAsync(NIFTY);
+                HttpResponseMessage response = await client.GetAsync(_nIFTY);
                 response.EnsureSuccessStatusCode();
                 string responseBody = await response.Content.ReadAsStringAsync();
                 JObject o = JObject.Parse(responseBody);
                 XmlDocument xd1 = (XmlDocument)JsonConvert.DeserializeXmlNode(responseBody, "records");
-                xd1.Save(SaveNifty);
-                myDataSet.ReadXml(SaveNifty);
+                xd1.Save(_saveNifty);
+                myDataSet.ReadXml(_saveNifty);
                 NiftyHeader();
                 NiftyPE();
                 NiftyCE();
@@ -127,14 +101,14 @@ namespace StockMarketNSC
             try
             {
                 client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-                using (HttpResponseMessage response = await client.GetAsync(BANKNIFTY))
+                using (HttpResponseMessage response = await client.GetAsync(_bANKNIFTY))
                 {
                     response.EnsureSuccessStatusCode();
                     string responseBody = await response.Content.ReadAsStringAsync();
                     JObject o = JObject.Parse(responseBody);
                     XmlDocument xd1 = (XmlDocument)JsonConvert.DeserializeXmlNode(responseBody, "records");
-                    xd1.Save(SaveBankNifty);
-                    myDataSet.ReadXml(SaveBankNifty);
+                    xd1.Save(_saveBankNifty);
+                    myDataSet.ReadXml(_saveBankNifty);
                     BankNiftyHeader();
                     BankNiftyPE();
                     BankNiftyCE();
@@ -147,11 +121,12 @@ namespace StockMarketNSC
             }
         }
 
+        #region Nifty
         //  Insert data into NiftyHeader table
         public void NiftyHeader()
         {
-            string connection = DataBase;
-            SqlConnection con = new SqlConnection(connection);
+            string ConnectionString = _connectionString;
+            SqlConnection con = new SqlConnection(ConnectionString);
             DataTable data = myDataSet.Tables["data"];
             con.Open();
             string batch = @"select isnull(MAX(batch_Id),0) from NiftyHeader";
@@ -177,8 +152,8 @@ namespace StockMarketNSC
         //  Insert data into NiftyPE table
         public void NiftyPE()
         {
-            string connection = DataBase;
-            SqlConnection con = new SqlConnection(connection);
+            string ConnectionString = _connectionString;
+            SqlConnection con = new SqlConnection(ConnectionString);
             DataTable data = myDataSet.Tables["PE"];
 
             con.Open();
@@ -235,8 +210,8 @@ namespace StockMarketNSC
         //  Insert data into NiftyCE table
         public void NiftyCE()
         {
-            string connection = DataBase;
-            SqlConnection con = new SqlConnection(connection);
+            string ConnectionString = _connectionString;
+            SqlConnection con = new SqlConnection(ConnectionString);
             DataTable data = myDataSet.Tables["CE"];
 
             con.Open();
@@ -288,12 +263,14 @@ namespace StockMarketNSC
                 con.Close();
             }
         }
+        #endregion
 
+        #region BankNifty
         //  Insert data into BankNiftyHeader table
         public void BankNiftyHeader()
         {
-            string connection = DataBase;
-            SqlConnection con = new SqlConnection(connection);
+            string ConnectionString = _connectionString;
+            SqlConnection con = new SqlConnection(ConnectionString);
             DataTable data = myDataSet.Tables["data"];
             con.Open();
             string batch = @"select isnull(MAX(batch_Id),0) from BankNiftyHeader";
@@ -318,8 +295,8 @@ namespace StockMarketNSC
         //  Insert Data into BankNiftyPE table
         public void BankNiftyPE()
         {
-            string connection = DataBase;
-            SqlConnection con = new SqlConnection(connection);
+            string ConnectionString = _connectionString;
+            SqlConnection con = new SqlConnection(ConnectionString);
             DataTable data = myDataSet.Tables["PE"];
             con.Open();
             string batch = @"select isnull(MAX(batch_Id),0) from BankNiftyPE";
@@ -373,8 +350,8 @@ namespace StockMarketNSC
         //  Insert data into BankNiftyCE table
         public void BankNiftyCE()
         {
-            string connection = DataBase;
-            SqlConnection con = new SqlConnection(connection);
+            string ConnectionString = _connectionString;
+            SqlConnection con = new SqlConnection(ConnectionString);
             DataTable data = myDataSet.Tables["CE"];
             con.Open();
             string batch = @"select isnull(MAX(batch_Id),0) from BankNiftyCE";
@@ -428,8 +405,8 @@ namespace StockMarketNSC
         //  Insert data into BankNiftyIndex table
         public void BankNiftyIndex()
         {
-            string connection = DataBase;
-            SqlConnection con = new SqlConnection(connection);
+            string ConnectionString = _connectionString;
+            SqlConnection con = new SqlConnection(ConnectionString);
             DataTable data = myDataSet.Tables["index"];
             con.Open();
             string batch = @"select isnull(MAX(batch_Id),0) from BankNiftyIndex";
@@ -473,6 +450,7 @@ namespace StockMarketNSC
                 con.Close();
             }
         }
+        #endregion
 
         protected override void OnStop()
         {
